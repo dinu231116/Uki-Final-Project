@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,9 +9,21 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Get redirect path from query param, fallback to '/our-services'
   const searchParams = new URLSearchParams(location.search);
   const redirectPath = searchParams.get('redirect') || '/our-services';
+
+  // Prevent showing login page if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    if (token) {
+      if (role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate(redirectPath);
+      }
+    }
+  }, [navigate, redirectPath]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,18 +36,19 @@ const Login = () => {
       });
 
       const data = await res.json();
-      toast.success('Login successful! Redirecting...');
 
       if (res.ok) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('userName', data.user.name);
+        localStorage.setItem('user', JSON.stringify({ name: data.user.name }));
         localStorage.setItem('role', data.user.role);
+
+        toast.success('Login successful! Redirecting...');
+
         if (data.user.role === 'admin') {
-          navigate('/admin/dashboard'); // Replace with your admin route
+          navigate('/admin/dashboard');
         } else {
-          navigate(redirectPath); // For normal users
+          navigate(redirectPath);
         }
-        // After login, redirect to intended page or default page
       } else {
         toast.error(data.message || 'Login failed');
       }
@@ -47,35 +59,42 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 rounded shadow w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        {error && <p className="text-red-600 mb-4">{error}</p>}
-        <form onSubmit={handleLogin} className="space-y-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-blue-100 px-4">
+      <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md">
+        <h2 className="text-3xl font-extrabold mb-6 text-blue-900 text-center">Login</h2>
+        {error && <p className="text-red-600 mb-4 text-center">{error}</p>}
+        <form onSubmit={handleLogin} className="space-y-6">
           <input
             type="email"
             placeholder="Email"
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-md px-4 py-3 transition outline-none"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="username"
           />
           <input
             type="password"
             placeholder="Password"
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-md px-4 py-3 transition outline-none"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            autoComplete="current-password"
           />
-          <button className="w-full bg-blue-600 text-white py-2 rounded">
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md shadow-md transition duration-300"
+          >
             Login
           </button>
         </form>
-
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Don't have an account?{' '}
-          <a href="/register" className="text-blue-600 hover:underline">
+        <p className="text-center text-sm text-gray-600 mt-6">
+          Don&apos;t have an account?{' '}
+          <a
+            href="/register"
+            className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+          >
             Register here
           </a>
         </p>

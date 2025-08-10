@@ -1,6 +1,7 @@
 import User from '../models/user.js';
 import Order from '../models/order.js';
 import Payment from '../models/payment.js';
+import Service from '../models/serviceModel.js'; 
 
 // Dashboard stats (real DB data)
 export const getDashboardStats = async (req, res) => {
@@ -44,6 +45,16 @@ export const getAllPayments = async (req, res) => {
     const payments = await Payment.find();
     res.json(payments);
   } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+// ✅ ✅ ✅ Services Controller
+export const getAllServices = async (req, res) => {
+  try {
+    const services = await Service.find();
+    res.status(200).json(services);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 };

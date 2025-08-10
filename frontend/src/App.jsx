@@ -32,9 +32,13 @@ import SuccessPage from './pages/paymentSuccess';
 import PrivateRoute from "./components/PrivateRoute";
 
 import CartPage from './pages/CartPage';  // you need to create this component
-import CartCheckoutPage from './pages/CartCheckoutPage'; // you need to create this component
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AdminServices from './pages/AdminServices';
+
+
+
 
 function App() {
   return (
@@ -60,6 +64,8 @@ function App() {
         <Route path="/booking/washing" element={<WashingBooking />} />
         <Route path="/booking/ironing" element={<IroningBooking />} />
         <Route path="/booking/dry-cleaning" element={<DryCleaningBooking />} />
+
+
         <Route path="/place-order" element={<PlaceOrder />} />
 
         {/* <Route path="/payment" element={<PaymentPage />} /> */}
@@ -78,6 +84,9 @@ function App() {
         <Route path="/admin/users" element={<UsersPage />} />
         <Route path="/admin/orders" element={<OrdersPage />} />
         <Route path="/admin/payments" element={<PaymentsPage />} />
+        <Route path="/admin/services" element={<AdminServices />} />
+       
+       
                                                
       <Route path="/our-services" element={<OurServices />} />
       <Route path="/order-confirmation" element={<OrderConfirmation />} />
@@ -87,8 +96,10 @@ function App() {
            <Route path="/feedback/:orderId" element={<FeedbackPage />} />
         
       <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CartCheckoutPage />} />
+       
           <Route path="/success" element={<SuccessPage />} />
+       
+
 
           
 

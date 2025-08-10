@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
-  const [role, setRole] = useState('user');
+  const [role] = useState('user'); // fixed role, no dropdown needed
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,9 +15,7 @@ const Register = () => {
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password, role }),
       });
 
@@ -25,7 +23,7 @@ const Register = () => {
 
       if (res.ok) {
         alert('Registration successful!');
-        navigate('/login'); // Redirect to login
+        navigate('/login');
       } else {
         setError(data.message || 'Registration failed');
       }
@@ -36,75 +34,77 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-50 px-4">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-blue-700 mb-4 text-center">Create an Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-100 via-blue-50 to-white px-6">
+      <div className="bg-white p-10 rounded-2xl shadow-xl max-w-md w-full border border-gray-200">
+        <h2 className="text-3xl font-extrabold text-blue-700 mb-8 text-center tracking-tight">
+          Create an Account
+        </h2>
 
         {error && (
-          <div className="mb-4 text-red-600 text-sm text-center">
+          <div className="mb-6 px-4 py-3 text-sm text-red-700 bg-red-100 rounded-md border border-red-300 text-center">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleRegister}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+        <form onSubmit={handleRegister} className="space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+              Name
+            </label>
             <input
+              id="name"
               type="text"
               placeholder="Your Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-3 focus:ring-blue-400 focus:border-blue-500 transition"
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <div>
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              Email
+            </label>
             <input
+              id="email"
               type="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-3 focus:ring-blue-400 focus:border-blue-500 transition"
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <div>
+            <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               placeholder="Create password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 placeholder-gray-400 focus:outline-none focus:ring-3 focus:ring-blue-400 focus:border-blue-500 transition"
             />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Register As</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-lg"
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-lg shadow-md transition"
           >
             Register
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
-          Already have an account? <a href="/login" className="text-blue-600 hover:underline">Login</a>
+        <p className="mt-6 text-center text-gray-600 text-sm">
+          Already have an account?{' '}
+          <a href="/login" className="text-blue-600 font-semibold hover:underline">
+            Login
+          </a>
         </p>
       </div>
     </div>

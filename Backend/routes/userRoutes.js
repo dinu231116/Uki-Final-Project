@@ -5,7 +5,8 @@ import {
   getAllUsers,
   updateUserRole,
   updateUserProfile,
-  getCurrentUser
+  getCurrentUser,
+  getProfile,
 } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { adminOnly } from '../middleware/adminMiddleware.js';
@@ -16,7 +17,7 @@ const router = express.Router();
 router.put('/:id/role', protect, adminOnly, updateUserRole);
 
 // ✅ Get currently logged-in user
-router.get('/', protect, getCurrentUser);
+router.get('/profile', protect, getProfile);
 
 // ✅ Get all users (admin only)
 router.get('/users', protect, adminOnly, getAllUsers);

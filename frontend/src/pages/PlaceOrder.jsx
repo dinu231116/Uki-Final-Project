@@ -1,29 +1,44 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify'; // <-- import ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // <-- import styles
 
 const PlaceOrder = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     customerName: '',
-    items: [],
     pickupDate: '',
     deliveryDate: '',
-    address: '',
     total: '',
-    serviceType: '',
-    instructions: '',
-    weightKg: ''
+    instructions: ''
   });
 
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    let cartTotal = '';
+    if (location.state?.total) {
+      cartTotal = location.state.total;
+    } else {
+      cartTotal = localStorage.getItem('cartTotal') || '';
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      customerName: user?.name || '',
+      total: cartTotal
+    }));
+  }, [location.state]);
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [e.target.name]: e.target.value
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -32,7 +47,7 @@ const PlaceOrder = () => {
 
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Please login first');
+      toast.error('Please login first'); // <-- toastify for not logged in
       navigate('/login');
       setLoading(false);
       return;
@@ -47,21 +62,17 @@ const PlaceOrder = () => {
         },
         body: JSON.stringify({
           customerName: formData.customerName,
-          items: [{ name: "Example Item", quantity: 1 }], // update this as needed
+          items: [{ name: "Example Item", quantity: 1 }], // Replace with actual cart items
           pickupDate: formData.pickupDate,
           deliveryDate: formData.deliveryDate,
-          address: formData.address,
           total: Number(formData.total),
-          serviceType: formData.serviceType,
-          instructions: formData.instructions,
-          weightKg: parseFloat(formData.weightKg)
+          instructions: formData.instructions
         })
       });
 
       if (res.ok) {
         const data = await res.json();
         toast.success('Order placed successfully!');
-        // Pass orderId and amount to payment page
         navigate('/payment', { state: { orderId: data.order._id, amount: data.order.total } });
       } else {
         const errorData = await res.json();
@@ -76,127 +87,104 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-8 bg-white rounded-lg shadow-lg mt-10">
-      <h2 className="text-3xl font-semibold mb-6 text-center text-blue-700">Place Your Order</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="max-w-md mx-auto p-8 bg-white rounded-xl shadow-lg mt-16">
+      <h2 className="text-3xl font-bold mb-8 text-center text-blue-700">
+        Place Your Order
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Customer Name */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700">Customer Name</label>
+          <label htmlFor="customerName" className="block mb-2 font-semibold text-gray-700">
+            Customer Name
+          </label>
           <input
+            id="customerName"
             name="customerName"
             value={formData.customerName}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your full name"
+            readOnly
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Your Name"
           />
         </div>
 
+        {/* Pickup Date */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700">Pickup Date</label>
+          <label htmlFor="pickupDate" className="block mb-2 font-semibold text-gray-700">
+            Pickup Date
+          </label>
           <input
+            id="pickupDate"
             type="date"
             name="pickupDate"
             value={formData.pickupDate}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Delivery Date */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700">Delivery Date</label>
+          <label htmlFor="deliveryDate" className="block mb-2 font-semibold text-gray-700">
+            Delivery Date
+          </label>
           <input
+            id="deliveryDate"
             type="date"
             name="deliveryDate"
             value={formData.deliveryDate}
             onChange={handleChange}
             required
-            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Total */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700">Address</label>
-          <textarea
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            required
-            rows={3}
-            className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter your pickup address"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium text-gray-700">Total (₹)</label>
+          <label htmlFor="total" className="block mb-2 font-semibold text-gray-700">
+            Total (LKR)
+          </label>
           <input
-            type="number"
+            id="total"
+            type="text"
             name="total"
-            value={formData.total}
-            onChange={handleChange}
-            required
-            min={0}
-            step="0.01"
-            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Total amount"
+            value={`LKR ${Number(formData.total).toLocaleString('en-LK')}`}
+            readOnly
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
+        {/* Instructions */}
         <div>
-          <label className="block mb-1 font-medium text-gray-700">Service Type</label>
-          <select
-            name="serviceType"
-            value={formData.serviceType}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded-md p-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="" disabled>Select a service</option>
-            <option value="Washing">Washing</option>
-            <option value="DryCleaning">Dry Cleaning</option>
-            <option value="Ironing">Ironing</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium text-gray-700">Instructions</label>
+          <label htmlFor="instructions" className="block mb-2 font-semibold text-gray-700">
+            Instructions
+          </label>
           <textarea
+            id="instructions"
             name="instructions"
             value={formData.instructions}
             onChange={handleChange}
-            rows={3}
-            className="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={4}
             placeholder="Any special instructions (optional)"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg resize-none text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
-        <div>
-          <label className="block mb-1 font-medium text-gray-700">Weight (Kg)</label>
-          <input
-            type="number"
-            name="weightKg"
-            value={formData.weightKg}
-            onChange={handleChange}
-            required
-            min={0}
-            step="0.01"
-            className="w-full border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter weight in kilograms"
-          />
-        </div>
-
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className={`w-full mt-6 py-3 rounded-md font-semibold text-white transition ${
+          className={`w-full py-3 rounded-lg font-semibold text-white transition ${
             loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
           {loading ? 'Placing Order...' : 'Place Order'}
         </button>
       </form>
+      <ToastContainer position="top-right" autoClose={2500} /> {/* <-- ToastContainer */}
     </div>
   );
 };

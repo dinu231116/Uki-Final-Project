@@ -1,8 +1,6 @@
 import Order from '../models/order.js';
-import AdminSettings from '../models/AdminSettings.js';
-import dayjs from 'dayjs';
 
-// ✅ Create Order (NOT USED: for testing only)
+// ✅ Create Order (test only)
 export const createOrder = async (req, res) => {
   const { items } = req.body;
 
@@ -59,18 +57,15 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-// ✅ Place Order (with daily capacity check)
+// ✅ Place Order (MINIMUM VERSION)
 export const placeOrder = async (req, res) => {
   const {
     customerName,
     items,
     pickupDate,
     deliveryDate,
-    address,
     total,
-    serviceType,
     instructions,
-    weightKg,
   } = req.body;
 
   if (
@@ -78,43 +73,20 @@ export const placeOrder = async (req, res) => {
     !items ||
     !pickupDate ||
     !deliveryDate ||
-    !address ||
-    !total ||
-    !serviceType ||
-    !weightKg
+    !total
   ) {
-    return res.status(400).json({ error: 'Missing order details' });
+    return res.status(400).json({ error: 'Missing required order fields' });
   }
 
   try {
-    const today = dayjs().format('YYYY-MM-DD');
-    const settings = await AdminSettings.findOne({ date: today });
-
-    if (!settings) {
-      return res.status(404).json({ error: 'Today settings not found! Please create it first.' });
-    }
-
-    if (settings.remainingCapacityKg < weightKg) {
-      return res.status(400).json({
-        error: `Sorry, only ${settings.remainingCapacityKg} kg left for today.`,
-      });
-    }
-
-    // Deduct capacity
-    settings.remainingCapacityKg -= weightKg;
-    await settings.save();
-
     const newOrder = new Order({
       user: req.user.id,
       customerName,
       items,
       pickupDate,
       deliveryDate,
-      address,
       total,
-      serviceType,
       instructions,
-      weightKg,
       status: 'pending',
       paymentStatus: 'unpaid',
     });
@@ -128,7 +100,7 @@ export const placeOrder = async (req, res) => {
   }
 };
 
-// ✅ Cancel Order (NO validation issues!)
+// ✅ Cancel Order
 export const cancelOrder = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -148,7 +120,6 @@ export const cancelOrder = async (req, res) => {
       return res.status(400).json({ message: 'Order already cancelled' });
     }
 
-    // ✅ Use updateOne to skip schema validation for required fields
     await Order.updateOne(
       { _id: orderId },
       { $set: { status: 'cancelled' } }
@@ -161,3 +132,31 @@ export const cancelOrder = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+// ...existing code...
+
+// ✅ Update Order Status (ADMIN)
+export const updateOrderStatus = async (req, res) => {
+  const orderId = req.params.id;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: 'Status is required' });
+  }
+
+  try {
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({ message: 'Order status updated', order });
+  } catch (error) {
+    console.error('Update Order Status Error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// ...existing code...

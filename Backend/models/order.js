@@ -11,20 +11,12 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    serviceType: {
-      type: String,
-      required: true,
-    },
     items: [
       {
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
       },
     ],
-    weightKg: {
-      type: Number,
-      required: true,
-    },
     total: {
       type: Number,
       required: true,
@@ -37,18 +29,14 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    address: {
+    instructions: {
       type: String,
-      required: true,
+      default: '',
     },
     status: {
       type: String,
       enum: ['pending', 'in-process', 'completed', 'delivered', 'cancelled'],
       default: 'pending',
-    },
-    instructions: {
-      type: String,
-      default: '',
     },
     paymentStatus: {
       type: String,
@@ -58,7 +46,6 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 const Order = mongoose.model('Order', orderSchema);
 

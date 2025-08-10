@@ -2,12 +2,21 @@ import express from 'express';
 import User from '../models/user.js';
 import Order from '../models/order.js';
 import Payment from '../models/paymentModel.js';
+import Service from '../models/serviceModel.js';
 import { protect } from '../middleware/authMiddleware.js';
-// import { getAllOrders } from '../controllers/orderController.js'; // நீங்கள் இதை பயன்படுத்த விரும்பினால் uncomment பண்ணவும்.
+
+import {
+  getAllServices,
+  createService,
+  updateService,
+  deleteService,
+  getServiceById,
+} from '../controllers/serviceController.js';
 
 const router = express.Router();
 
-router.get('/stats', async (req, res) => {
+// Dashboard stats route
+router.get('/stats', protect, async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalOrders = await Order.countDocuments();
@@ -31,19 +40,32 @@ router.get('/stats', async (req, res) => {
   }
 });
 
-// ✅ Add GET /all-orders route protected by auth middleware
+// Services routes
+router.get('/services', protect, getAllServices);       // GET all services
+router.post('/services', protect, createService);       // POST create service
+router.put('/services/:id', protect, updateService);    // PUT update service
+router.delete('/services/:id', protect, deleteService); // DELETE service
+router.get('/services/:id', protect, getServiceById);   // GET single service by id
+
+// Orders and Payments routes
 router.get('/all-orders', protect, async (req, res) => {
   try {
-    const orders = await Order.find(); // தேவையென்றால் user-wise filter செய்யலாம்: { user: req.user._id }
+    const orders = await Order.find().populate('user');
     res.json(orders);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
-router.get('/all-payments', (req, res) => {
-  // DB ல இருந்து payments எடு
-  res.json({ payments: [] });
+
+router.get('/all-payments', protect, async (req, res) => {
+  try {
+    const payments = await Payment.find();
+    res.json(payments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 export default router;

@@ -39,39 +39,6 @@ const MyOrders = () => {
     fetchOrders();
   }, [navigate]);
 
-  // Order cancel handler
-  const handleCancel = async (orderId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Please login first');
-      navigate('/login');
-      return;
-    }
-
-    if (!window.confirm('Are you sure you want to cancel this order?')) return;
-
-    try {
-      const res = await fetch(`http://localhost:5000/api/order/cancel/${orderId}`, {
-        method: 'PUT', // or DELETE based on your backend
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (res.ok) {
-        alert('Order cancelled successfully');
-        // Refresh orders after cancel
-        setOrders((prev) => prev.map(order => order._id === orderId ? { ...order, status: 'cancelled' } : order));
-      } else {
-        alert('Failed to cancel order');
-      }
-    } catch (error) {
-      console.error('Cancel order error:', error);
-      alert('Something went wrong while cancelling');
-    }
-  };
-
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -80,12 +47,31 @@ const MyOrders = () => {
     return <div className="p-4">You have no orders yet.</div>;
   }
 
+  // Helper: style status with colors
+  const getStatusClass = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
     <div className="min-h-screen p-8">
       <h1 className="text-2xl font-bold mb-6">My Orders</h1>
       <div className="space-y-4">
         {orders.map((order) => (
-          <div key={order._id} className="border p-4 rounded shadow">
+          <div
+            key={order._id}
+            className="border p-6 rounded-lg shadow-md bg-white"
+          >
             <p><strong>Order ID:</strong> {order._id}</p>
             <p><strong>Service:</strong> {order.serviceType}</p>
             <p><strong>Pickup Date:</strong> {new Date(order.pickupDate).toLocaleDateString()}</p>
@@ -93,17 +79,18 @@ const MyOrders = () => {
             <p><strong>Address:</strong> {order.address}</p>
             <p><strong>Weight:</strong> {order.weightKg || 0} Kg</p>
             <p><strong>Total:</strong> ₹{order.total}</p>
-            <p><strong>Status:</strong> {order.status}</p>
-            <p><strong>Payment:</strong> {order.paymentStatus}</p>
 
-            {order.status !== 'cancelled' && (
-              <button
-                className="mt-2 bg-red-500 text-white px-4 py-2 rounded"
-                onClick={() => handleCancel(order._id)}
+            {/* Status badge */}
+            <div className="mt-2">
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusClass(order.status)}`}
               >
-                Cancel Order
-              </button>
-            )}
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </span>
+            </div>
+
+            {/* Payment status */}
+            <p className="mt-2"><strong>Payment:</strong> {order.paymentStatus}</p>
           </div>
         ))}
       </div>

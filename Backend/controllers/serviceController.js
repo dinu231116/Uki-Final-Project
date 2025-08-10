@@ -26,17 +26,18 @@ export const getServiceById = async (req, res) => {
   }
 };
 
-// ✅ Create new service (already perfect)
+// ✅ Create new service (image field added)
 export const createService = async (req, res) => {
   try {
-    const { name, description, price, duration, details } = req.body;
+    const { name, description, price, duration, details, image } = req.body;
 
     const newService = new Service({
       name,
       description,
       price,
       duration,
-      details, // details சேர்க்கவும்
+      details,
+      image,  // Image URL save
     });
 
     const createdService = await newService.save();
@@ -48,7 +49,7 @@ export const createService = async (req, res) => {
   }
 };
 
-// ✅ Update service by ID in DB
+// ✅ Update service by ID in DB (image field added)
 export const updateService = async (req, res) => {
   try {
     const service = await Service.findById(req.params.id);
@@ -58,6 +59,7 @@ export const updateService = async (req, res) => {
       service.price = req.body.price || service.price;
       service.duration = req.body.duration || service.duration;
       service.details = req.body.details || service.details;
+      service.image = req.body.image || service.image;  // Update image field
 
       const updatedService = await service.save();
       res.json(updatedService);

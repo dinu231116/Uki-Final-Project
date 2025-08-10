@@ -1,20 +1,24 @@
-import React, { useEffect, useState , useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { scroller } from 'react-scroll';
+
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [profileName, setProfileName] = useState('');
   const [cartCount, setCartCount] = useState(0);
-    const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
   const [showCart, setShowCart] = useState(false);
-
-    const cartRef = useRef();
+  const cartRef = useRef();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const name = localStorage.getItem('userName');
+
+    // ✅ Fix: Get user from 'user' key & parse JSON
+    const user = JSON.parse(localStorage.getItem('user'));
+    const name = user?.name;
+
     if (token && name) {
       setProfileName(name);
     } else {
@@ -48,8 +52,6 @@ const Navbar = () => {
       window.removeEventListener('cartUpdated', handleCartUpdated);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-
-
   }, [location]);
 
   const handleScrollToSection = (sectionId) => {
@@ -75,12 +77,11 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userName');
+    localStorage.removeItem('user');
     setProfileName('');
     navigate('/login');
   };
 
-  // Navigate to profile page on click
   const goToProfile = () => {
     navigate('/profile');
   };
@@ -138,7 +139,6 @@ const Navbar = () => {
           </button>
         </li>
 
-
         {/* Cart Button */}
         {cartCount > 0 && (
           <li className="relative">
@@ -167,11 +167,13 @@ const Navbar = () => {
                           <p className="font-medium">{item.name || item.dress || "Item"}</p>
                           <p className="text-sm text-gray-600">Qty: {item.qty || item.quantity || 1}</p>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold">
-                            ₹{item.rate ? (item.rate * (item.qty || 1)).toFixed(2) : "N/A"}
-                          </p>
-                        </div>
+<div className="text-right">
+  <p className="font-semibold">
+    {/* Change ₹ to Rs. for Sri Lankan Rupees */}
+    Rs.{item.rate ? (item.rate * (item.qty || item.quantity || 1)).toFixed(2) : "N/A"}
+  </p>
+</div>
+
                       </li>
                     ))}
                   </ul>
@@ -195,11 +197,9 @@ const Navbar = () => {
           </li>
         )}
 
-
         <li>
           {profileName ? (
             <div className="flex items-center gap-2">
-              {/* Make profile circle clickable */}
               <div
                 onClick={goToProfile}
                 className="cursor-pointer w-10 h-10 bg-blue-800 text-white flex items-center justify-center rounded-full uppercase"
@@ -208,11 +208,11 @@ const Navbar = () => {
                 {profileName.charAt(0)}
               </div>
               <button
-                onClick={handleLogout}
-                className="ml-2 text-sm text-blue-700 underline"
-              >
-                Logout
-              </button>
+        onClick={handleLogout}
+        className="ml-2 text-sm bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition"
+      >
+        Logout
+      </button>
             </div>
           ) : (
             <RouterLink

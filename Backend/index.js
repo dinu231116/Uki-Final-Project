@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import uploadRouter from './routes/upload.js';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -47,7 +48,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/pricing', pricingRoutes);
 app.use('/api/admin', adminRoutes);
-
+app.use('/api/upload', uploadRouter);
 app.use('/api/adminsettings', settingsRoutes);
 
 

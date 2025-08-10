@@ -10,7 +10,7 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:5000/api/user/profile", { // <-- fixed URL
+        const res = await axios.get("http://localhost:5000/api/user/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -27,23 +27,42 @@ const ProfilePage = () => {
     fetchProfile();
   }, []);
 
-  if (loading) return <p>Loading profile...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) return <p className="text-center mt-10 text-gray-700">Loading profile...</p>;
+  if (error) return <p className="text-center mt-10 text-red-600">{error}</p>;
 
   return (
-    <div style={{ padding: "1rem", maxWidth: "600px", margin: "auto" }}>
-      <h2>My Profile</h2>
-      <p><strong>Name:</strong> {profile.name}</p>
-      <p><strong>Email:</strong> {profile.email}</p>
-      <p><strong>Phone:</strong> {profile.phone || "Not provided"}</p>
-      <p><strong>Address:</strong> {profile.address || "Not provided"}</p>
-      <p><strong>Total Orders:</strong> {profile.totalOrders}</p>
-      <p><strong>Active Orders:</strong> {profile.activeOrders}</p>
-      <p><strong>Completed Orders:</strong> {profile.completedOrders}</p>
-      <p><strong>Last Order Date:</strong> {profile.lastOrderDate ? new Date(profile.lastOrderDate).toLocaleDateString() : "No orders yet"}</p>
-      <p><strong>Joined On:</strong> {new Date(profile.joinedOn).toLocaleDateString()}</p>
+    <div className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-lg shadow">
+      <h2 className="text-3xl font-bold mb-6 text-blue-900">My Profile</h2>
+      <div className="space-y-4">
+        <ProfileRow label="Name" value={profile.name} />
+        <ProfileRow label="Email" value={profile.email} />
+        <ProfileRow label="Phone" value={profile.phone || "Not provided"} />
+        <ProfileRow label="Address" value={profile.address || "Not provided"} />
+        <ProfileRow label="Total Orders" value={profile.totalOrders} />
+        <ProfileRow label="Active Orders" value={profile.activeOrders} />
+        <ProfileRow label="Completed Orders" value={profile.completedOrders} />
+        <ProfileRow
+          label="Last Order Date"
+          value={
+            profile.lastOrderDate
+              ? new Date(profile.lastOrderDate).toLocaleDateString()
+              : "No orders yet"
+          }
+        />
+        <ProfileRow
+          label="Joined On"
+          value={new Date(profile.joinedOn).toLocaleDateString()}
+        />
+      </div>
     </div>
   );
 };
+
+const ProfileRow = ({ label, value }) => (
+  <div className="flex justify-between border-b pb-2">
+    <span className="font-medium text-gray-700">{label}:</span>
+    <span className="text-gray-900">{value}</span>
+  </div>
+);
 
 export default ProfilePage;

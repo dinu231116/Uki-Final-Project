@@ -1,4 +1,5 @@
 import User from '../models/user.js';
+import Order from '../models/order.js'; 
 
 export const getAllUsers = async (req, res) => {
   try {
